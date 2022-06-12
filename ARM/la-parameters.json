@@ -6,19 +6,19 @@
             "value": "eastus2"
         },
         "environmentName": {
-            "value": "env-name"
+            "value": "dev"
         },
         "projectName": {
-            "value": "project-name"
+            "value": "nyp-test-stdla"
         },
         "logicAppName": {
-            "value": "la-name"
+            "value": "arm-stdla"
         },
         "appServicePlanName": {
-            "value": "asp-name"
+            "value": "arm-stdla-asp"
         },
         "storageName": {
-            "value": "storage-name"
+            "value": "nyplogicappstddemo"
         },
         "kind": {
             "value": "StorageV2"
