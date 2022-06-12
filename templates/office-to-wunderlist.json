@@ -1,0 +1,105 @@
+{
+    "id": "/providers/Microsoft.Logic/galleries/public/templates/962f42368af84bd1ade21cbab02c1df5",
+    "type": "Microsoft.Logic/galleries/templates",
+    "name": "962f42368af84bd1ade21cbab02c1df5",
+    "properties": {
+        "author": {
+            "displayName": "Microsoft"
+        },
+        "categoryNames": [
+            "productivity"
+        ],
+        "description": "${Resources.TEMPLATE_OFFICE_TO_WUNDERLIST_DESCRIPTION}",
+        "displayName": "${Resources.TEMPLATE_OFFICE_TO_WUNDERLIST_DISPLAYNAME}",
+        "galleryName": "public",
+        "summary": "",
+        "definition": {
+            "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+            "actions": {
+                "Create_a_task": {
+                    "inputs": {
+                        "body": {
+                            "list_id": null,
+                            "title": "@{triggerBody()['Subject']}"
+                        },
+                        "host": {
+                            "connection": {
+                                "name": "@parameters('$connections')['wunderlist']['connectionId']"
+                            }
+                        },
+                        "method": "post",
+                        "path": "/tasks"
+                    },
+                    "runAfter": {},
+                    "type": "ApiConnection"
+                }
+            },
+            "contentVersion": "1.0.0.0",
+            "outputs": {},
+            "parameters": {
+                "$connections": {
+                    "defaultValue": {},
+                    "type": "Object"
+                }
+            },
+            "triggers": {
+                "On_new_email": {
+                    "inputs": {
+                        "host": {
+                            "connection": {
+                                "name": "@parameters('$connections')['office365']['connectionId']"
+                            }
+                        },
+                        "method": "get",
+                        "path": "/Mail/OnNewEmail",
+                        "queries": {
+                            "folderPath": "Inbox",
+                            "importance": "High"
+                        }
+                    },
+                    "splitOn": "@triggerBody()?['value']",
+                    "recurrence": {
+                        "frequency": "Minute",
+                        "interval": 3
+                    },
+                    "type": "ApiConnection"
+                }
+            }
+        },
+        "connectionReferences": {
+            "office365": {
+                "connection": {
+                    "id": ""
+                },
+                "api": {
+                    "id": "/subscriptions/{0}/providers/Microsoft.Web/locations/{1}/managedApis/office365"
+                }
+            },
+            "wunderlist": {
+                "connection": {
+                    "id": ""
+                },
+                "api": {
+                    "id": "/subscriptions/{0}/providers/Microsoft.Web/locations/{1}/managedApis/wunderlist"
+                }
+            }
+        },
+        "apiSummaries": [
+            {
+                "type": "apiconnection",
+                "displayName": "${Resources.OFFICE}",
+                "iconUri": "https://connectoricons-prod.azureedge.net/office365/icon_1.0.1008.1183.png",
+                "brandColor": "#0072c5"
+            },
+            {
+                "type": "apiconnection",
+                "displayName": "${Resources.WUNDERLIST}",
+                "iconUri": "https://az818438.vo.msecnd.net/icons/wunderlist.png",
+                "brandColor": "#de4c40"
+            }
+        ],
+        "changedTime": "2017-07-05T00:00:37.000Z",
+        "createdTime": "2017-01-31T00:00:37.000Z",
+        "popularity": 23
+    }
+}
