@@ -5,8 +5,8 @@ $LOCATION="eastus2"
 
 # 1. Zip the logic dir
 cd .\logic
-mkdir -p ../output
-Compress-Archive -Path . -DestinationPath ../output/logic.zip
+mkdir -p -Force ../output
+Compress-Archive -Path . -DestinationPath ../output/logic.zip -Force
 cd ../
 
 # 2. Get publish profile
@@ -24,7 +24,7 @@ $profile = $profile.Replace("`r", "").Replace("`n", "")
 #     app-name: ${{secrets.RG_LA}}
 #     package: './output/logic.zip'
 #     publish-profile: ${{steps.publishprofile.outputs.profile}}
-az functionapp deploy --resource-group $RG_LA --name $LA_NAME --src-path ../output/logic.zip --type zip
+az functionapp deploy --resource-group $RG_LA --name $LA_NAME --src-path ./output/logic.zip --type zip
 
 # 4. Swap parameter files and deploy
 az functionapp deploy --resource-group $RG_LA --name $LA_NAME --src-path  logic/azure.parameters.json --type static --target-path parameters.json

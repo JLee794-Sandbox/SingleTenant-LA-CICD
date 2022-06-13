@@ -4,7 +4,7 @@
 name: (classic) Build and Deploy Logic App. 
 
 env:
-  LA_NAME: 'la-name-324234'
+  LA_NAME: 'ghsample-test-deploy'
 
 on:
   workflow_dispatch:

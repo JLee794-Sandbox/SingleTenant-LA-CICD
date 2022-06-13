@@ -18,7 +18,6 @@
       "command": "host start",
       "problemMatcher": "$func-watch",
       "isBackground": true,
-      "dependsOn": "generateDebugSymbols",
       "options": {
         "cwd": "${workspaceFolder}/logic"
       }

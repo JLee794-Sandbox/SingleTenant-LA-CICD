@@ -3,5 +3,8 @@
   "azureLogicAppsStandard.projectLanguage": "JavaScript",
   "azureLogicAppsStandard.projectRuntime": "~3",
   "debug.internalConsoleOptions": "neverOpen",
-  "azureLogicAppsStandard.projectSubpath": "logic"
+  "azureLogicAppsStandard.projectSubpath": "logic",
+  "azureFunctions.deploySubpath": "logic",
+  "azureFunctions.projectLanguage": "Custom",
+  "azureFunctions.projectRuntime": "~4"
 }
