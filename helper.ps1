@@ -1,7 +1,7 @@
 $AZURE_SUB="7386cd39-b109-4cc6-bb80-bf12413d0a99"
 $RG_LA="nyp-logicapp-std-demo-rg"
 $LA_NAME="ghsample-test-deploy"
-$LOCATION="eastus2"
+# $LOCATION="eastus2"
 $FolderName = "./output"
 
 # Dependencies
@@ -18,12 +18,12 @@ Compress-Archive -Path ".\logic\*" -DestinationPath ./output/logic.zip -Force
 
 
 # 2. Get publish profile (this step is not required if you're az logined)
-Write-Debug "Retrieving publish profile..."
-$profile = Get-AzWebAppPublishingProfile `
--ResourceGroupName $RG_LA `
--Name $LA_NAME
+# Write-Debug "Retrieving publish profile..."
+# $profile = Get-AzWebAppPublishingProfile `
+# -ResourceGroupName $RG_LA `
+# -Name $LA_NAME
 
-$profile = $profile.Replace("`r", "").Replace("`n", "")
+# $profile = $profile.Replace("`r", "").Replace("`n", "")
 
 # 3. Deploy to Azure Logic App
 # az functionapp deploy --resource-group $RG_LA --name $LA_NAME --src-path ./output/logic.zip --type zip (this works too)
