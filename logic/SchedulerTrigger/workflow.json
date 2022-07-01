@@ -1,0 +1,259 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "Condition": {
+                "actions": {
+                    "Publish_Event": {
+                        "inputs": {
+                            "body": [
+                                {
+                                    "data": {
+                                        "jobRecurrence": {
+                                            "count": "@int(triggerBody()?['jobRecurrence']?['count'])",
+                                            "endTime": "@{triggerBody()?['jobRecurrence']?['endTime']}",
+                                            "frequency": "@{triggerBody()['jobRecurrence']['frequency']}",
+                                            "interval": "@int(triggerBody()['jobRecurrence']['interval'])"
+                                        },
+                                        "jobStatus": {
+                                            "executionCount": "@if(equals(triggerBody()?['jobStatus']?['executionCount'], null), 0, int(triggerBody()?['jobStatus']?['executionCount']))",
+                                            "faultedCount": "@if(equals(triggerBody()?['jobStatus']?['faultedCount'], null), 0, int(triggerBody()?['jobStatus']?['faultedCount']))",
+                                            "lastExecutionTime": "@{triggerBody()?['jobStatus']?['lastExecutionTime']}",
+                                            "nextExecutionTime": "@{variables('nextTime')}"
+                                        },
+                                        "startTime": "@{triggerBody()?['startTime']}",
+                                        "timerjobid": "@{triggerBody()['timerjobid']}"
+                                    },
+                                    "eventType": "recordInserted",
+                                    "id": "@triggerBody()['timerjobid']",
+                                    "subject": "@triggerBody()['timerjobid']"
+                                }
+                            ],
+                            "host": {
+                                "connection": {
+                                    "referenceName": "@appsetting('EG_CONNECTION_NAME')"
+                                }
+                            },
+                            "method": "post",
+                            "path": "/eventGrid/api/events"
+                        },
+                        "runAfter": {},
+                        "type": "ApiConnection"
+                    },
+                    "Response": {
+                        "inputs": {
+                            "body": "Next execution time will be at @{variables('nextTime')}",
+                            "statusCode": 201
+                        },
+                        "kind": "http",
+                        "runAfter": {
+                            "Publish_Event": [
+                                "Succeeded"
+                            ]
+                        },
+                        "type": "Response"
+                    },
+                    "Scope_2": {
+                        "actions": {
+                            "Response_2": {
+                                "inputs": {
+                                    "body": "Failed to create timer job\n\nIF: {\n   AND: {\n        OR: {\n           endTime(@{if(empty(triggerBody()?['jobRecurrence']?['endTime']), -1, triggerBody()?['jobRecurrence']?['endTime'])}) is equal to (-1) =  @{equals(if(empty(triggerBody()?['jobRecurrence']?['endTime']), -1, triggerBody()?['jobRecurrence']?['endTime']), -1)}\n           nextTime(@{variables('nextTime')}) is less than endTime(@{triggerBody()?['jobRecurrence']?['endTime']}) = @{less(variables('nextTime'), triggerBody()?['jobRecurrence']?['endTime'])}\n        }\n        OR: {\n           count(@{coalesce(triggerBody()?['jobRecurrence']?['count'],-1)}) is equal to (-1) = @{equals(coalesce(triggerBody()?['jobRecurrence']?['count'],-1), -1)}\n           count(@{coalesce(triggerBody()?['jobRecurrence']?['count'],1)}) is greater than executionCount(@{coalesce(triggerBody()?['jobStatus']?['executionCount'],0)}) = @{greater(coalesce(triggerBody()?['jobRecurrence']?['count'],1), coalesce(triggerBody()?['jobStatus']?['executionCount'],0))}\n        }\n    }\n}\n",
+                                    "statusCode": 400
+                                },
+                                "kind": "http",
+                                "runAfter": {},
+                                "type": "Response"
+                            },
+                            "Terminate": {
+                                "inputs": {
+                                    "runError": {
+                                        "message": "Failed to create timer job"
+                                    },
+                                    "runStatus": "Failed"
+                                },
+                                "runAfter": {
+                                    "Response_2": [
+                                        "Succeeded"
+                                    ]
+                                },
+                                "type": "Terminate"
+                            }
+                        },
+                        "runAfter": {
+                            "Publish_Event": [
+                                "FAILED"
+                            ]
+                        },
+                        "type": "Scope"
+                    }
+                },
+                "else": {
+                    "actions": {
+                        "Exceeded_Criteria_Response": {
+                            "inputs": {
+                                "body": "Job completion criteria met.\nDetails: \nConditional ran:\nIF: {\n   AND: {\n        OR: {\n           endTime(@{if(empty(triggerBody()?['jobRecurrence']?['endTime']), -1, triggerBody()?['jobRecurrence']?['endTime'])}) is equal to (-1) =  @{equals(if(empty(triggerBody()?['jobRecurrence']?['endTime']), -1, triggerBody()?['jobRecurrence']?['endTime']), -1)}\n           nextTime(@{variables('nextTime')}) is less than endTime(@{triggerBody()?['jobRecurrence']?['endTime']}) = @{less(variables('nextTime'), triggerBody()?['jobRecurrence']?['endTime'])}\n        }\n        OR: {\n           count(@{coalesce(triggerBody()?['jobRecurrence']?['count'],-1)}) is equal to (-1) = @{equals(coalesce(triggerBody()?['jobRecurrence']?['count'],-1), -1)}\n           count(@{coalesce(triggerBody()?['jobRecurrence']?['count'],1)}) is greater than executionCount(@{coalesce(triggerBody()?['jobStatus']?['executionCount'],0)}) = @{greater(coalesce(triggerBody()?['jobRecurrence']?['count'],1), coalesce(triggerBody()?['jobStatus']?['executionCount'],0))}\n        }\n    }\n}\n",
+                                "statusCode": 409
+                            },
+                            "kind": "http",
+                            "runAfter": {},
+                            "type": "Response"
+                        }
+                    }
+                },
+                "expression": {
+                    "and": [
+                        {
+                            "or": [
+                                {
+                                    "equals": [
+                                        "@if(empty(triggerBody()?['jobRecurrence']?['endTime']), -1, triggerBody()?['jobRecurrence']?['endTime'])",
+                                        -1
+                                    ]
+                                },
+                                {
+                                    "less": [
+                                        "@variables('nextTime')",
+                                        "@triggerBody()?['jobRecurrence']?['endTime']"
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "or": [
+                                {
+                                    "equals": [
+                                        "@coalesce(triggerBody()?['jobRecurrence']?['count'],-1)",
+                                        -1
+                                    ]
+                                },
+                                {
+                                    "greater": [
+                                        "@coalesce(triggerBody()?['jobRecurrence']?['count'],1)",
+                                        "@coalesce(triggerBody()?['jobStatus']?['executionCount'],0)"
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "runAfter": {
+                    "Initialize_nextTime": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "If"
+            },
+            "Initialize_nextTime": {
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "nextTime",
+                            "type": "string",
+                            "value": "@{addToTime(coalesce(triggerBody()?['jobStatus']?['lastExecutionTime'],variables('startTime')),triggerBody()['jobRecurrence']['interval'],triggerBody()['jobRecurrence']['frequency'])}"
+                        }
+                    ]
+                },
+                "runAfter": {
+                    "Initialize_startTime": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "InitializeVariable"
+            },
+            "Initialize_startTime": {
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "startTime",
+                            "type": "string",
+                            "value": "@{if(less(coalesce(triggerBody()?['startTime'],utcNow()),utcNow()),utcNow(),coalesce(triggerBody()?['startTime'],utcNow()))}"
+                        }
+                    ]
+                },
+                "runAfter": {},
+                "type": "InitializeVariable"
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "triggers": {
+            "manual": {
+                "inputs": {
+                    "schema": {
+                        "properties": {
+                            "jobRecurrence": {
+                                "properties": {
+                                    "count": {
+                                        "minimum": -1,
+                                        "title": "count (jobRecurrence)",
+                                        "type": "integer"
+                                    },
+                                    "endTime": {
+                                        "title": "endTime (jobRecurrence)",
+                                        "type": "string"
+                                    },
+                                    "frequency": {
+                                        "enum": [
+                                            "second",
+                                            "minute",
+                                            "hour",
+                                            "day",
+                                            "week",
+                                            "month"
+                                        ],
+                                        "title": "frequency (jobRecurrence)",
+                                        "type": "string"
+                                    },
+                                    "interval": {
+                                        "title": "interval (jobRecurrence)",
+                                        "type": "integer"
+                                    }
+                                },
+                                "required": [
+                                    "frequency",
+                                    "interval"
+                                ],
+                                "type": "object"
+                            },
+                            "jobStatus": {
+                                "properties": {
+                                    "executionCount": {
+                                        "title": "executionCount (jobStatus)",
+                                        "type": "integer"
+                                    },
+                                    "faultedCount": {
+                                        "title": "faultedCount (jobStatus)",
+                                        "type": "integer"
+                                    },
+                                    "lastExecutionTime": {
+                                        "title": "lastExecutionTime (jobStatus)",
+                                        "type": "string"
+                                    },
+                                    "nextExecutionTime": {
+                                        "title": "nextExecutionTime (jobStatus)",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            },
+                            "startTime": {
+                                "type": "string"
+                            },
+                            "timerjobid": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "jobRecurrence",
+                            "timerjobid"
+                        ],
+                        "type": "object"
+                    }
+                },
+                "kind": "Http",
+                "type": "Request"
+            }
+        }
+    },
+    "kind": "Stateful"
+}

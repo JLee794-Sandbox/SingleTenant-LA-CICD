@@ -1,0 +1,12 @@
+{
+  "managedApiConnections": {
+    %{ for conn in ${managedApiConnections} }
+        
+        conn
+        
+        %{if element(managedApiConnections, length(managedApiConnections)-1) == conn }
+        ,
+        %{ endif }
+    %{ endfor }
+  }
+}

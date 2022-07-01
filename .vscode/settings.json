@@ -1,10 +1,11 @@
 {
-  "azureLogicAppsStandard.deploySubpath": ".",
+  "azureLogicAppsStandard.deploySubpath": "",
   "azureLogicAppsStandard.projectLanguage": "JavaScript",
   "azureLogicAppsStandard.projectRuntime": "~3",
   "debug.internalConsoleOptions": "neverOpen",
-  "azureLogicAppsStandard.projectSubpath": "logic",
-  "azureFunctions.deploySubpath": "logic",
-  "azureFunctions.projectLanguage": "Custom",
+  "azureLogicAppsStandard.projectSubpath": "LogicApp-Deploy/logic",
+  "azureFunctions.projectSubpath": "az-fn-app",
+  "azureFunctions.deploySubpath": "az-fn-app",
+  "azureFunctions.projectLanguage": "Python",
   "azureFunctions.projectRuntime": "~4"
 }

@@ -2,55 +2,303 @@
     "definition": {
         "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
         "actions": {
-            "Response": {
-                "type": "Response",
-                "kind": "http",
-                "inputs": {
-                    "statusCode": 200
+            "Condition": {
+                "actions": {},
+                "else": {
+                    "actions": {
+                        "Terminate": {
+                            "inputs": {
+                                "runError": {
+                                    "message": "Failed to create the next timer job"
+                                },
+                                "runStatus": "Failed"
+                            },
+                            "runAfter": {},
+                            "type": "Terminate"
+                        }
+                    }
+                },
+                "expression": {
+                    "and": [
+                        {
+                            "equals": [
+                                "@outputs('Call_an_Azure_function')?['statusCode']",
+                                409
+                            ]
+                        }
+                    ]
                 },
                 "runAfter": {
-                    "Create_blob_(V2)": [
+                    "Invoke_a_workflow_in_this_workflow_app": [
                         "Succeeded"
                     ]
-                }
+                },
+                "type": "If"
             },
-            "Create_blob_(V2)": {
-                "type": "ApiConnection",
+            "Delay_until_nextExecutionTime": {
                 "inputs": {
-                    "host": {
-                        "connection": {
-                            "referenceName": "azureblob"
+                    "until": {
+                        "timestamp": "@body('Parse_JSON_Body')?['data']?['jobStatus']?['nextExecutionTime']"
+                    }
+                },
+                "runAfter": {
+                    "Parse_JSON_Body": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "Wait"
+            },
+            "Increment_faultedCount": {
+                "inputs": {
+                    "name": "faultedCount",
+                    "value": 1
+                },
+                "runAfter": {
+                    "[Scope]_Job_to_Schedule": [
+                        "FAILED"
+                    ]
+                },
+                "type": "IncrementVariable"
+            },
+            "Initialize_faultedCount": {
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "faultedCount",
+                            "type": "integer",
+                            "value": "@if(equals(body('Parse_JSON_Body')?['data']?['jobStatus']?['faultedCount'], null), int(body('Parse_JSON_Body')?['data']?['jobStatus']?['faultedCount']), 0)"
                         }
+                    ]
+                },
+                "runAfter": {
+                    "Delay_until_nextExecutionTime": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "InitializeVariable"
+            },
+            "Invoke_a_workflow_in_this_workflow_app": {
+                "inputs": {
+                    "body": {
+                        "jobRecurrence": {
+                            "count": "@int(body('Parse_JSON_Body')?['data']?['jobRecurrence']?['count'])",
+                            "endTime": "@body('Parse_JSON_Body')?['data']?['jobRecurrence']?['endTime']",
+                            "frequency": "@body('Parse_JSON_Body')?['data']?['jobRecurrence']?['frequency']",
+                            "interval": "@int(body('Parse_JSON_Body')?['data']?['jobRecurrence']?['interval'])"
+                        },
+                        "jobStatus": {
+                            "executionCount": "@add(1,int(body('Parse_JSON_Body')?['data']?['jobStatus']?['executionCount']))",
+                            "faultedCount": "@variables('faultedCount')",
+                            "lastExecutionTime": "@body('Parse_JSON_Body')?['data']?['jobStatus']?['nextExecutionTime']"
+                        },
+                        "startTime": "@body('Parse_JSON_Body')?['data']?['startTime']",
+                        "timerjobid": "@body('Parse_JSON_Body')?['data']?['timerjobid']"
                     },
-                    "method": "post",
-                    "body": "@triggerBody()",
-                    "headers": {
-                        "ReadFileMetadataFromServer": true
-                    },
-                    "path": "/v2/datasets/@{encodeURIComponent(encodeURIComponent('sacb34ucffd7en6'))}/files",
-                    "queries": {
-                        "folderPath": "/blobs",
-                        "name": "@{utcNow()}",
-                        "queryParametersSingleEncoded": true
+                    "host": {
+                        "workflow": {
+                            "id": "eventtriggerstateful"
+                        }
+                    }
+                },
+                "runAfter": {
+                    "[Scope]_Steps_to_run_on_Error": [
+                        "Succeeded",
+                        "TIMEDOUT",
+                        "SKIPPED",
+                        "FAILED"
+                    ]
+                },
+                "type": "Workflow"
+            },
+            "Parse_JSON_Body": {
+                "inputs": {
+                    "content": "@triggerBody()",
+                    "schema": {
+                        "properties": {
+                            "data": {
+                                "properties": {
+                                    "jobRecurrence": {
+                                        "properties": {
+                                            "count": {
+                                                "minimum": -1,
+                                                "title": "count (jobRecurrence)",
+                                                "type": "number"
+                                            },
+                                            "endTime": {
+                                                "title": "endTime (jobRecurrence)",
+                                                "type": "string"
+                                            },
+                                            "frequency": {
+                                                "enum": [
+                                                    "second",
+                                                    "minute",
+                                                    "hour",
+                                                    "day",
+                                                    "week",
+                                                    "month"
+                                                ],
+                                                "title": "frequency (jobRecurrence)",
+                                                "type": "string"
+                                            },
+                                            "interval": {
+                                                "default": null,
+                                                "minimum": 0,
+                                                "nullable": true,
+                                                "title": "interval (jobRecurrence)",
+                                                "type": "number"
+                                            }
+                                        },
+                                        "required": [
+                                            "frequency",
+                                            "interval"
+                                        ],
+                                        "type": "object"
+                                    },
+                                    "jobStatus": {
+                                        "properties": {
+                                            "executionCount": {
+                                                "default": null,
+                                                "minimum": 0,
+                                                "nullable": true,
+                                                "title": "executionCount (jobStatus)",
+                                                "type": "number"
+                                            },
+                                            "faultedCount": {
+                                                "default": null,
+                                                "minimum": 0,
+                                                "nullable": true,
+                                                "title": "faultedCount (jobStatus)",
+                                                "type": "number"
+                                            },
+                                            "lastExecutionTime": {
+                                                "title": "lastExecutionTime (jobStatus)",
+                                                "type": "string"
+                                            },
+                                            "nextExecutionTime": {
+                                                "title": "nextExecutionTime (jobStatus)",
+                                                "type": "string"
+                                            }
+                                        },
+                                        "required": [
+                                            "nextExecutionTime"
+                                        ],
+                                        "type": "object"
+                                    },
+                                    "startTime": {
+                                        "type": "string"
+                                    },
+                                    "timerjobid": {
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "timerjobid",
+                                    "jobRecurrence",
+                                    "jobStatus"
+                                ],
+                                "type": "object"
+                            },
+                            "dataVersion": {
+                                "type": "string"
+                            },
+                            "eventTime": {
+                                "type": "string"
+                            },
+                            "eventType": {
+                                "type": "string"
+                            },
+                            "id": {
+                                "type": "string"
+                            },
+                            "metadataVersion": {
+                                "type": "string"
+                            },
+                            "subject": {
+                                "type": "string"
+                            },
+                            "topic": {
+                                "type": "string"
+                            }
+                        },
+                        "type": "object"
                     }
                 },
                 "runAfter": {},
-                "runtimeConfiguration": {
-                    "contentTransfer": {
-                        "transferMode": "Chunked"
+                "type": "ParseJson"
+            },
+            "[Scope]_Job_to_Schedule": {
+                "actions": {
+                    "Call_an_Azure_function": {
+                        "inputs": {
+                            "body": "@body('Parse_JSON_Body')",
+                            "function": {
+                                "connectionName": "azureFunctionOperation"
+                            },
+                            "method": "POST"
+                        },
+                        "runAfter": {},
+                        "type": "Function"
+                    },
+                    "HTTP_Dummy_Call": {
+                        "inputs": {
+                            "method": "GET",
+                            "uri": "https://api.chucknorris.io/jokes/random?category=dev"
+                        },
+                        "runAfter": {
+                            "Call_an_Azure_function": [
+                                "Succeeded"
+                            ]
+                        },
+                        "type": "Http"
                     }
-                }
-            }
-        },
-        "triggers": {
-            "manual": {
-                "type": "Request",
-                "kind": "Http",
-                "inputs": {}
+                },
+                "runAfter": {
+                    "Initialize_faultedCount": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "Scope"
+            },
+            "[Scope]_Steps_to_run_on_Error": {
+                "actions": {},
+                "runAfter": {
+                    "Increment_faultedCount": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "Scope"
             }
         },
         "contentVersion": "1.0.0.0",
-        "outputs": {}
+        "outputs": {},
+        "triggers": {
+            "When_a_resource_event_occurs": {
+                "inputs": {
+                    "body": {
+                        "properties": {
+                            "destination": {
+                                "endpointType": "webhook",
+                                "properties": {
+                                    "endpointUrl": "@{listCallbackUrl()}"
+                                }
+                            },
+                            "topic": "/subscriptions/7386cd39-b109-4cc6-bb80-bf12413d0a99/resourceGroups/nyp-logicapp-std-demo-rg/providers/Microsoft.EventGrid/topics/CreateTimerJob"
+                        }
+                    },
+                    "host": {
+                        "connection": {
+                            "referenceName": "azureeventgrid"
+                        }
+                    },
+                    "path": "/subscriptions/@{encodeURIComponent('7386cd39-b109-4cc6-bb80-bf12413d0a99')}/providers/@{encodeURIComponent('Microsoft.EventGrid.Topics')}/resource/eventSubscriptions",
+                    "queries": {
+                        "x-ms-api-version": "2017-09-15-preview"
+                    }
+                },
+                "splitOn": "@triggerBody()",
+                "type": "ApiConnectionWebhook"
+            }
+        }
     },
     "kind": "Stateful"
 }

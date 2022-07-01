@@ -1,0 +1,103 @@
+# Docs for the Azure Web Apps Deploy action: https://github.com/azure/functions-action
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
+name: (classic) Logic App Infrastructure as Code Pipeline. 
+
+on:
+  workflow_dispatch:
+    inputs:
+      deployWorkflows:
+        type: boolean
+        description: 'Deploy the logic app workflows in the /logic directory?'
+        required: false
+        default: true
+      deployFunctions:
+        type: boolean
+        description: 'Deploy the function in the /function directory?'
+        required: false
+        default: true
+  push:
+    paths:
+      - "iac/**"
+      - ".github/workflows/coreinfra_deploy.yml"
+
+env:
+  modulePath: 'iac'
+  terraform_version: 1.1.8
+  location: 'eastus2'
+  logic_app_name: 'std-la-cicd-demo'
+  resource_group_name: 'std-la-cicd-demo'
+  storage_account_name: 'stdlacicddemosa'
+
+jobs:
+  job_deploy_core_infrastructure:
+    name: Init-Validate-Apply
+    runs-on: ubuntu-latest
+    environment: 
+      name: Dev
+    steps:
+      - name: Prepare environment variables
+        env:
+          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+          AZURE_SUBSCRIPTION: ${{ secrets.AZURE_SUBSCRIPTION }}
+        run: | 
+          # Parse Azure secret into Terraform variables
+          $servicePrincipal = ($env:AZURE_CREDENTIALS | ConvertFrom-Json)
+          $env:ARM_CLIENT_ID = $servicePrincipal.clientId
+          $env:ARM_CLIENT_SECRET = $servicePrincipal.clientSecret
+          $env:ARM_SUBSCRIPTION_ID = $env:AZURE_SUBSCRIPTION
+          $env:ARM_TENANT_ID = $servicePrincipal.tenantId
+          
+          # Save environment variable setup for subsequent steps
+          Get-ChildItem -Path Env: -Recurse -Include ARM_*,TF_VAR_* | ForEach-Object {Write-Output "$($_.Name)=$($_.Value)"} >> $env:GITHUB_ENV
+        shell: pwsh
+
+      # Checkout
+      - name: Checkout
+        uses: actions/checkout@v1
+    
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.1.7
+
+      - name: Terraform fmt
+        id: fmt
+        run: terraform fmt -check
+        continue-on-error: true
+
+      - name: Terraform Init
+        working-directory: ${{ env.modulePath }}
+        run: terraform init
+
+      - name: Terraform Validate
+        working-directory: ${{ env.modulePath }}
+        run: terraform validate
+
+      - name: Terraform Plan
+        working-directory: ${{ env.modulePath }}
+        continue-on-error: true
+        run: |
+          terraform plan \
+            -var-file="Parameters/uat.tfvars"
+      
+      - name: Terraform Apply
+        working-directory: ${{ env.modulePath }}
+        run: |
+          terraform apply \
+            -auto-approve \
+            -var "location={{ env.location }}" \
+            -var "logic_app_name={{ env.logic_app_name }}" \
+            -var "resource_group_name={{ env.resource_group_name }}" \
+            -var "storage_account_name={{ env.storage_account_name }}"
+
+  job_deploy_logic_app_workflows:
+    name: Init-Validate-Apply
+      runs-on: ubuntu-latest
+      environment: 
+        name: Dev
+      steps:
+      - uses: .github/workflows/workflow_deploy.yml
+        with:
+          username: ${{ inputs.username }}
+          token: ${{ secrets.envPAT }}

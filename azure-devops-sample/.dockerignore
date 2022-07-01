@@ -1,8 +1,0 @@
-.debug
-.git*
-.vscode
-.pipelines
-deploy
-test
-logic/workflow-designtime
-local.settings.json
