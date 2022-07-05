@@ -9,6 +9,8 @@ env:
 on:
   workflow_dispatch:
     # Trigger the workflow every time the build workflow ran to completion
+  workflow_call:
+    
   workflow_run:
     workflows:
       - (classic) Logic App Infrastructure as Code Pipeline.
