@@ -24,7 +24,7 @@ runs:
         Write-Output "::endgroup::"
     
     - name: Checkout
-      uses: actions/checkout@v1    
+      uses: actions/checkout@v2
     
     - name: Azure Login
       uses: Azure/login@v1
@@ -50,7 +50,7 @@ runs:
         azPSVersion: latest
 
     - name: Deploy to Azure Logic App
-      uses: Azure/functions-action@v1.3.1
+      uses: azure/functions-action@v1.3.1
       id: la
       with:
         app-name: ${{inputs.resourceGroupName}}
