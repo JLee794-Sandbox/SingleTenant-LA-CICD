@@ -32,7 +32,7 @@ env:
 jobs:
   job_deploy_core_infrastructure:
     name: Init-Validate-Apply
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     environment: 
       name: Dev
     steps:
@@ -93,10 +93,13 @@ jobs:
 
   job_deploy_logic_app_workflows:
     name: Init-Validate-Apply
-      runs-on: ubuntu-latest
-      environment: 
-        name: Dev
-      steps:
+    runs-on: ubuntu-latest
+    environment: 
+      name: Dev
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v2
+        with:
       - uses: .github/workflows/workflow_deploy.yml
         with:
           username: ${{ inputs.username }}
