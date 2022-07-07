@@ -67,16 +67,20 @@ jobs:
         working-directory: ${{ env.modulePath }}
         continue-on-error: true
         run: |
-          terraform plan -var-file="Parameters/uat.tfvars"
+          terraform plan \
+            -var "location=${{ env.location }}" \
+            -var "logic_app_name=${{ env.logic_app_name }}" \
+            -var "resource_group_name=${{ env.resource_group_name }}" \
+            -var "storage_account_name=${{ env.storage_account_name }}"
       
       - name: Terraform Apply
         working-directory: ${{ env.modulePath }}
         run: |
           terraform apply -auto-approve \
-            -var "location={{ env.location }}" \
-            -var "logic_app_name={{ env.logic_app_name }}" \
-            -var "resource_group_name={{ env.resource_group_name }}" \
-            -var "storage_account_name={{ env.storage_account_name }}"
+            -var "location=${{ env.location }}" \
+            -var "logic_app_name=${{ env.logic_app_name }}" \
+            -var "resource_group_name=${{ env.resource_group_name }}" \
+            -var "storage_account_name=${{ env.storage_account_name }}"
 
   # # job_deploy_logic_app_workflows:
   # #   name: Init-Validate-Apply
