@@ -32,23 +32,13 @@ env:
 jobs:
   job_deploy_core_infrastructure:
     name: Init-Validate-Apply
-    runs-on: windows-latest
+    env:
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+    runs-on: ubuntu-latest
     steps:
-      - name: Prepare environment variables
-        env:
-          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-          AZURE_SUBSCRIPTION: ${{ secrets.AZURE_SUBSCRIPTION }}
-        run: | 
-          # Parse Azure secret into Terraform variables
-          $servicePrincipal = ($env:AZURE_CREDENTIALS | ConvertFrom-Json)
-          $env:ARM_CLIENT_ID = $servicePrincipal.clientId
-          $env:ARM_CLIENT_SECRET = $servicePrincipal.clientSecret
-          $env:ARM_SUBSCRIPTION_ID = $env:AZURE_SUBSCRIPTION
-          $env:ARM_TENANT_ID = $servicePrincipal.tenantId
-          
-          # Save environment variable setup for subsequent steps
-          Get-ChildItem -Path Env: -Recurse -Include ARM_*,TF_VAR_* | ForEach-Object {Write-Output "$($_.Name)=$($_.Value)"} >> $env:GITHUB_ENV
-        shell: pwsh
 
       # Checkout
       - name: Checkout
@@ -63,31 +53,26 @@ jobs:
         id: fmt
         run: terraform fmt -check
         continue-on-error: true
-        shell: pwsh
 
       - name: Terraform Init
         working-directory: ${{ env.modulePath }}
         run: terraform init
-        shell: pwsh
 
 
       - name: Terraform Validate
         working-directory: ${{ env.modulePath }}
         run: terraform validate
-        shell: pwsh
 
       - name: Terraform Plan
         working-directory: ${{ env.modulePath }}
         continue-on-error: true
         run: |
           terraform plan -var-file="Parameters/uat.tfvars"
-        shell: pwsh
       
       - name: Terraform Apply
         working-directory: ${{ env.modulePath }}
         run: |
           terraform apply auto-approve -var "location={{ env.location }}" -var "logic_app_name={{ env.logic_app_name }}" -var "resource_group_name={{ env.resource_group_name }}" -var "storage_account_name={{ env.storage_account_name }}"
-        shell: pwsh
 
   # job_deploy_logic_app_workflows:
   #   name: Init-Validate-Apply
