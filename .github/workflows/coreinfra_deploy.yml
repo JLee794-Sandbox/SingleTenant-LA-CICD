@@ -32,7 +32,7 @@ env:
 jobs:
   job_deploy_core_infrastructure:
     name: Init-Validate-Apply
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - name: Prepare environment variables
         env:
@@ -63,25 +63,31 @@ jobs:
         id: fmt
         run: terraform fmt -check
         continue-on-error: true
+        shell: pwsh
 
       - name: Terraform Init
         working-directory: ${{ env.modulePath }}
         run: terraform init
+        shell: pwsh
+
 
       - name: Terraform Validate
         working-directory: ${{ env.modulePath }}
         run: terraform validate
+        shell: pwsh
 
       - name: Terraform Plan
         working-directory: ${{ env.modulePath }}
         continue-on-error: true
         run: |
           terraform plan -var-file="Parameters/uat.tfvars"
+        shell: pwsh
       
       - name: Terraform Apply
         working-directory: ${{ env.modulePath }}
         run: |
           terraform apply auto-approve -var "location={{ env.location }}" -var "logic_app_name={{ env.logic_app_name }}" -var "resource_group_name={{ env.resource_group_name }}" -var "storage_account_name={{ env.storage_account_name }}"
+        shell: pwsh
 
   # job_deploy_logic_app_workflows:
   #   name: Init-Validate-Apply
