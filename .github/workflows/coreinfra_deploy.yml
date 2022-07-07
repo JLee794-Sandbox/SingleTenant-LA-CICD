@@ -32,9 +32,7 @@ env:
 jobs:
   job_deploy_core_infrastructure:
     name: Init-Validate-Apply
-    runs-on: windows-latest
-    environment: 
-      name: Dev
+    runs-on: ubuntu-latest
     steps:
       - name: Prepare environment variables
         env:
