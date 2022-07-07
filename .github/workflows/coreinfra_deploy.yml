@@ -91,16 +91,16 @@ jobs:
             -var "resource_group_name={{ env.resource_group_name }}" \
             -var "storage_account_name={{ env.storage_account_name }}"
 
-  job_deploy_logic_app_workflows:
-    name: Init-Validate-Apply
-    runs-on: ubuntu-latest
-    environment: 
-      name: Dev
-    steps:
-      - name: 'Checkout'
-        uses: actions/checkout@v2
-        with:
-      - uses: .github/templates/workflow_deploy.yml
-        with:
-          logicAppName: ${{ env.logic_app_name }}
-          resourceGroupName: ${{ env.resource_group_name }}
+  # job_deploy_logic_app_workflows:
+  #   name: Init-Validate-Apply
+  #   runs-on: ubuntu-latest
+  #   environment: 
+  #     name: Dev
+  #   steps:
+  #     - name: 'Checkout'
+  #       uses: actions/checkout@v2
+  #       with:
+  #     - uses: .github/templates/workflow_deploy.yml
+  #       with:
+  #         logicAppName: ${{ env.logic_app_name }}
+  #         resourceGroupName: ${{ env.resource_group_name }}
