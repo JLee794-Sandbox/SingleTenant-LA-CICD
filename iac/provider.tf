@@ -11,7 +11,7 @@ terraform {
     resource_group_name  = "bootstrap"
     storage_account_name = "bootstrapsadev"
     container_name       = "tfstate"
-    key                  = "nyp-la-demo/terraform.tfstate"
+    key                  = "nyp-la-demo-ghaction/terraform.tfstate"
   }
 }
 
