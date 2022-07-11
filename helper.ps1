@@ -1,8 +1,12 @@
 $AZURE_SUB="7386cd39-b109-4cc6-bb80-bf12413d0a99"
-$RG_LA="nyp-logicapp-std-demo-rg"
-$LA_NAME="nyp-logicapp-std-demo"
+# $RG_LA="nyp-logicapp-std-demo-rg"
+# $LA_NAME="nyp-logicapp-std-demo"
+$RG_LA="std-la-cicd-demo"
+$LA_NAME="std-la-cicd-demo"
+
 # $LA_NAME="ghsample-test-deploy"
 # $LOCATION="eastus2"
+
 $FolderName = "./output"
 
 # Dependencies

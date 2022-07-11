@@ -42,3 +42,24 @@ resource "azapi_resource" "eventgrid_connection" {
   })
   response_export_values = ["properties.connectionRuntimeUrl", "properties.api.id"]
 }
+
+resource "azapi_resource" "eventgrid_connection_access_policy" {
+  type = "Microsoft.Web/connections/accessPolicies@2016-06-01"
+
+  schema_validation_enabled = false
+
+  name = "azureEventGridPublish-MSI-AccessPolicy"
+  parent_id =azapi_resource.eventgrid_connection.id
+
+  body = jsonencode({
+    properties: {
+      principal: {
+         type: "ActiveDirectory",
+         identity: {
+            objectId: azurerm_logic_app_standard.this.identity.0.principal_id,
+            tenantId: data.azurerm_client_config.current.tenant_id
+         }
+      }
+    }
+  })
+}

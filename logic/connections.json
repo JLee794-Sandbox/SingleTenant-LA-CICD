@@ -1,18 +1,4 @@
 {
-  "functionConnections": {
-      "functionAppCall": {
-          "authentication": {
-              "name": "Code",
-              "type": "QueryString",
-              "value": "@appsetting('azureFunctionOperation_functionAppKey')"
-          },
-          "displayName": "@appsetting('FN_CONNECTION_NAME')/HttpExample",
-          "function": {
-              "id": "/subscriptions/@appsetting('WORKFLOWS_SUBSCRIPTION_ID')/resourceGroups/@appsetting('WORKFLOWS_RESOURCE_GROUP_NAME')/providers/Microsoft.Web/sites/@appsetting('FN_CONNECTION_NAME')/functions/HttpExample"
-          },
-          "triggerUrl": "https://@appsetting('FN_CONNECTION_NAME').azurewebsites.net/api/httpexample"
-      }
-  },
   "managedApiConnections": {
       "azureEventGridPublish": {
           "api": {

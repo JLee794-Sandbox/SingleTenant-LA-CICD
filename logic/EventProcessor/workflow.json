@@ -282,12 +282,12 @@
                                     "endpointUrl": "@{listCallbackUrl()}"
                                 }
                             },
-                            "topic": "/subscriptions/7386cd39-b109-4cc6-bb80-bf12413d0a99/resourceGroups/nyp-logicapp-std-demo-rg/providers/Microsoft.EventGrid/topics/CreateTimerJob"
+                            "topic": "@appsetting('EG_TOPIC_NAME')"
                         }
                     },
                     "host": {
                         "connection": {
-                            "referenceName": "azureeventgrid"
+                            "referenceName": "azureEventGridPublish"
                         }
                     },
                     "path": "/subscriptions/@{encodeURIComponent('7386cd39-b109-4cc6-bb80-bf12413d0a99')}/providers/@{encodeURIComponent('Microsoft.EventGrid.Topics')}/resource/eventSubscriptions",

@@ -7,3 +7,8 @@ output
 *azurite
 
 cazuritedebug.log
+.terraform
+.terraform.tfstate
+*.tfstate.*
+*.tfstate
+terraform.tfvars

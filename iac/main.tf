@@ -1,9 +1,9 @@
 resource "azurerm_resource_group" "this" {
   name     = var.resource_group_name == "" ? "${var.logic_app_name}-rg" : var.resource_group_name
   location = var.location
-  lifecycle {
-    prevent_destroy = true
-  }
+  # lifecycle {
+  #   prevent_destroy = true
+  # }
 }
 
 resource "azurerm_service_plan" "this" {
@@ -38,6 +38,7 @@ resource "azurerm_logic_app_standard" "this" {
     type = "SystemAssigned"
   }
   app_settings = {
+    EG_TOPIC_NAME = azurerm_eventgrid_topic.this.name
     FN_CONNECTION_NAME = "azfn-py-dyninputs"
     EG_CONNECTION_NAME = azapi_resource.eventgrid_connection.name
     EG_CONNECTION_RUNTIME_URL = jsondecode(azapi_resource.eventgrid_connection.output).properties.connectionRuntimeUrl
