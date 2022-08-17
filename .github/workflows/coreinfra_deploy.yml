@@ -93,7 +93,7 @@ jobs:
           # Grouping task logs
           Write-Output "::group::Setup agent"
 
-          Install-Module -Name Az.Function -MinimumVersion "1.10.0" -Force
+          Install-Module -Name Az.Functions -MinimumVersion "4.0.0" -Force
 
           Write-Output "::endgroup::"
       

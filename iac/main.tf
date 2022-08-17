@@ -14,6 +14,11 @@ resource "azurerm_service_plan" "this" {
   os_type = "Windows"
 }
 
+
+# Create a vnet resource + subnets for app service and storage account
+# Make storage account private, with restricted network access to target vnet
+
+
 resource "azurerm_storage_account" "this" {
   name                     = substr(var.storage_account_name, 0, 24)
   resource_group_name      = azurerm_resource_group.this.name
@@ -22,6 +27,11 @@ resource "azurerm_storage_account" "this" {
   account_replication_type = "LRS"
   account_kind = "StorageV2"
   access_tier = "Hot"
+
+  network_rules {
+    default_action             = "Deny"
+    virtual_network_subnet_ids = [azurerm_virtual_network.this.subnets.storage-snet.id]
+  }
 }
 
 # Creating logic app standard will create a fileshare on the specified storage account
