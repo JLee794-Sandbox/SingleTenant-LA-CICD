@@ -10,7 +10,6 @@ on:
 env:
   logic_app_name: 'std-la-cicd-demo2'
   resource_group_name: 'std-la-cicd-demo2'
-  storage_account_name: 'stdlacicddemosa2'
 
 jobs:
   job_deploy_logic_app_workflows:
