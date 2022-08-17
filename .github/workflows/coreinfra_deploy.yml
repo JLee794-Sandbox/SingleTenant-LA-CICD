@@ -30,8 +30,8 @@ env:
   storage_account_name: 'stdlacicddemosa2'
 
 jobs:
-  job_deploy_core_infrastructure:
-    name: Init-Validate-Apply
+  deploy_core_infrastructure:
+    name: CoreInfra
     env:
       ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
       ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
@@ -82,9 +82,9 @@ jobs:
             -var "resource_group_name=${{ env.resource_group_name }}" \
             -var "storage_account_name=${{ env.storage_account_name }}"
 
-  job_deploy_logic_app_workflows:
-    name: Package-And-Deploy-Logic-App
-    needs: job_deploy_core_infrastructure
+  deploy_logic_app_workflows:
+    name: LogicAppWorkflows
+    needs: deploy_core_infrastructure
     runs-on: windows-latest
     steps:
       - name: 'Setup agent'
@@ -117,8 +117,8 @@ jobs:
         with:
           inlineScript: |
             $profile = Get-AzWebAppPublishingProfile `
-                -ResourceGroupName ${{ inputs.resourceGroupName }} `
-                -Name ${{ inputs.logicAppName }}
+                -ResourceGroupName ${{ env.resource_group_name }}" `
+                -Name ${{ env.logic_app_name }}
             $profile = $profile.Replace("`r", "").Replace("`n", "")
             Write-Output "::set-output name=profile::$profile"
           azPSVersion: latest
@@ -127,7 +127,7 @@ jobs:
         uses: azure/functions-action@v1.3.1
         id: la
         with:
-          app-name: ${{inputs.resourceGroupName}}
+          app-name: ${{ env.resource_group_name }}"
           package: './output/logic.zip'
           publish-profile: ${{steps.publishprofile.outputs.profile}}
 
@@ -136,7 +136,7 @@ jobs:
         uses: azure/powershell@v1
         with:
           inlineScript: |
-            az functionapp deploy --resource-group ${{ inputs.resourceGroupName }} --name ${{ inputs.logicAppName }} --src-path  logic/azure.parameters.json --type static --target-path parameters.json
+            az functionapp deploy --resource-group ${{ env.resource_group_name }}" --name ${{ env.logic_app_name }} --src-path  logic/azure.parameters.json --type static --target-path parameters.json
           azPSVersion: latest
 
   # # job_deploy_logic_app_workflows:
