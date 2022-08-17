@@ -17,7 +17,9 @@ resource "azurerm_service_plan" "this" {
 
 # Create a vnet resource + subnets for app service and storage account
 # Make storage account private, with restricted network access to target vnet
-
+data "http" "myip" {
+  url = "http://ipv4.icanhazip.com"
+}
 
 resource "azurerm_storage_account" "this" {
   name                     = substr(var.storage_account_name, 0, 24)
@@ -30,8 +32,10 @@ resource "azurerm_storage_account" "this" {
 
   network_rules {
     default_action             = "Deny"
-    virtual_network_subnet_ids = [azurerm_virtual_network.this.subnets.storage-snet.id]
+    ip_rules = [chomp(data.http.myip.body)]
+    virtual_network_subnet_ids = [azurerm_subnet.storage.id]
   }
+
 }
 
 # Creating logic app standard will create a fileshare on the specified storage account
@@ -54,6 +58,18 @@ resource "azurerm_logic_app_standard" "this" {
     EG_CONNECTION_RUNTIME_URL = jsondecode(azapi_resource.eventgrid_connection.output).properties.connectionRuntimeUrl
     EG_CONNECTION_ID = azapi_resource.eventgrid_connection.id
     EG_API_ID = jsondecode(azapi_resource.eventgrid_connection.output).properties.api.id
+    # WEBSITE_RUN_FROM_PACKAGE = "1"
+  }
+
+  site_config {
+    
+    ip_restriction {
+
+      action = "Allow"
+      virtual_network_subnet_ids = [
+        azurerm_subnet.app.id
+      ]
+    }
   }
 }
 
