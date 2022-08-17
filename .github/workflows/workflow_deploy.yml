@@ -7,6 +7,11 @@ on:
       # - "function/**"
       - ".github/workflows/workflow_deploy.yml"
 
+env:
+  logic_app_name: 'std-la-cicd-demo2'
+  resource_group_name: 'std-la-cicd-demo2'
+  storage_account_name: 'stdlacicddemosa2'
+
 jobs:
   job_deploy_logic_app_workflows:
     name: LogicAppWorkflows
@@ -48,6 +53,7 @@ jobs:
             $profile = Get-AzWebAppPublishingProfile `
                 -ResourceGroupName ${{ env.resource_group_name }} `
                 -Name ${{ env.logic_app_name }}
+
             $profile = $profile.Replace("`r", "").Replace("`n", "")
             Write-Output "::set-output name=profile::$profile"
           azPSVersion: latest
