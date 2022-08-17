@@ -84,7 +84,7 @@ jobs:
 
   job_deploy_logic_app_workflows:
     name: Package-And-Deploy-Logic-App
-    needs: Init-Validate-Apply
+    needs: job_deploy_core_infrastructure
     runs-on: windows-latest
     steps:
       - name: 'Setup agent'
