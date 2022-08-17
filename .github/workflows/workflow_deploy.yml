@@ -4,7 +4,7 @@ on:
   push:
     paths:
       - "logic/**"
-      - "function/**"
+      # - "function/**"
       - ".github/workflows/workflow_deploy.yml"
 
 jobs:
@@ -26,13 +26,13 @@ jobs:
         uses: actions/checkout@v2
       - uses: vimtor/action-zip@v1
         with:
-          files: /logic/
-          dest: ${{ github.workspace }}/wflows.zip
+          files: ./logic/
+          dest: wflows.zip
 
       - uses: actions/upload-artifact@v1
         with:
           name: workflows
-          path: ${{ github.workspace }}/wflows.zip
+          path: wflows.zip
 
       - name: Azure Login
         uses: Azure/login@v1
