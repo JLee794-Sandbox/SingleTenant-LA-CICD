@@ -1,7 +1,7 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/azure/functions-action
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: (classic) Logic App Infrastructure as Code Pipeline. 
+name: Logic App Infrastructure as Code Pipeline. 
 
 on:
   workflow_dispatch:
@@ -81,6 +81,63 @@ jobs:
             -var "logic_app_name=${{ env.logic_app_name }}" \
             -var "resource_group_name=${{ env.resource_group_name }}" \
             -var "storage_account_name=${{ env.storage_account_name }}"
+
+  job_deploy_logic_app_workflows:
+    name: Package-And-Deploy-Logic-App
+    needs: Init-Validate-Apply
+    runs-on: windows-latest
+    steps:
+      - name: 'Setup agent'
+        shell: pwsh
+        run: |
+          # Grouping task logs
+          Write-Output "::group::Setup agent"
+
+          Install-Module -Name Az.Function -MinimumVersion "1.10.0" -Force
+
+          Write-Output "::endgroup::"
+      
+      - name: Checkout
+        uses: actions/checkout@v2
+      
+      - name: Azure Login
+        uses: Azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          enable-AzPSSession: true
+      
+      - uses: actions/download-artifact@master
+        with:
+          name: logic
+          path: ./output/
+          
+      - name: Get publish Profile
+        id: publishprofile
+        uses: azure/powershell@v1
+        with:
+          inlineScript: |
+            $profile = Get-AzWebAppPublishingProfile `
+                -ResourceGroupName ${{ inputs.resourceGroupName }} `
+                -Name ${{ inputs.logicAppName }}
+            $profile = $profile.Replace("`r", "").Replace("`n", "")
+            Write-Output "::set-output name=profile::$profile"
+          azPSVersion: latest
+
+      - name: Deploy to Azure Logic App
+        uses: azure/functions-action@v1.3.1
+        id: la
+        with:
+          app-name: ${{inputs.resourceGroupName}}
+          package: './output/logic.zip'
+          publish-profile: ${{steps.publishprofile.outputs.profile}}
+
+      - name: Swap parameter files 
+        id: params
+        uses: azure/powershell@v1
+        with:
+          inlineScript: |
+            az functionapp deploy --resource-group ${{ inputs.resourceGroupName }} --name ${{ inputs.logicAppName }} --src-path  logic/azure.parameters.json --type static --target-path parameters.json
+          azPSVersion: latest
 
   # # job_deploy_logic_app_workflows:
   # #   name: Init-Validate-Apply
