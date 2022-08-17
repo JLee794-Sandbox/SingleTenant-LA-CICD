@@ -10,7 +10,6 @@ on:
 jobs:
   job_deploy_logic_app_workflows:
     name: LogicAppWorkflows
-    needs: deploy_core_infrastructure
     runs-on: windows-latest
     steps:
       - name: 'Setup agent'

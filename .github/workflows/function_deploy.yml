@@ -1,10 +1,9 @@
 name: 'Deploy Logic App Workflows'
-description: 'Deploys the /logic directory onto the single tenant logic app'
 
 on:
   push:
     paths:
-      - "logic/**"
+      # - "logic/**"
       - "function/**"
       - ".github/workflows/workflow_deploy.yml"
 
