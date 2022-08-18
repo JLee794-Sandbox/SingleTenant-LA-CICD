@@ -37,21 +37,21 @@ resource "azurerm_storage_account" "this" {
   }
 }
 
-resource "azurerm_storage_share" "this" {
-  name                 = var.logic_app_name
-  storage_account_name = azurerm_storage_account.this.name
-  quota                = 50
+# resource "azurerm_storage_share" "this" {
+#   name                 = var.logic_app_name
+#   storage_account_name = azurerm_storage_account.this.name
+#   quota                = 50
 
-  acl {
-    id = "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI"
+#   acl {
+#     id = "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI"
 
-    access_policy {
-      permissions = "rwdl"
-      start       = "2019-07-02T09:38:21.0000000Z"
-      expiry      = "2019-07-02T10:38:21.0000000Z"
-    }
-  }
-}
+#     access_policy {
+#       permissions = "rwdl"
+#       start       = "2019-07-02T09:38:21.0000000Z"
+#       expiry      = "2019-07-02T10:38:21.0000000Z"
+#     }
+#   }
+# }
 
 
 # Creating logic app standard will create a fileshare on the specified storage account
