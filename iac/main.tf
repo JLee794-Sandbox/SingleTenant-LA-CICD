@@ -84,7 +84,7 @@ resource "azurerm_logic_app_standard" "this" {
     ip_restriction {
 
       action = "Allow"
-      virtual_network_subnet_id = azurerm_subnet.app.id
+      virtual_network_subnet_id = azurerm_subnet.storage.id
     }
   }
 }
