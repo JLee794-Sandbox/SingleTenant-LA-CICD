@@ -35,8 +35,24 @@ resource "azurerm_storage_account" "this" {
     ip_rules = [chomp(data.http.myip.body)]
     virtual_network_subnet_ids = [azurerm_subnet.storage.id]
   }
-
 }
+
+resource "azurerm_storage_share" "this" {
+  name                 = var.logic_app_name
+  storage_account_name = azurerm_storage_account.this.name
+  quota                = 50
+
+  acl {
+    id = "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI"
+
+    access_policy {
+      permissions = "rwdl"
+      start       = "2019-07-02T09:38:21.0000000Z"
+      expiry      = "2019-07-02T10:38:21.0000000Z"
+    }
+  }
+}
+
 
 # Creating logic app standard will create a fileshare on the specified storage account
 resource "azurerm_logic_app_standard" "this" {
@@ -58,7 +74,9 @@ resource "azurerm_logic_app_standard" "this" {
     EG_CONNECTION_RUNTIME_URL = jsondecode(azapi_resource.eventgrid_connection.output).properties.connectionRuntimeUrl
     EG_CONNECTION_ID = azapi_resource.eventgrid_connection.id
     EG_API_ID = jsondecode(azapi_resource.eventgrid_connection.output).properties.api.id
-    # WEBSITE_RUN_FROM_PACKAGE = "1"
+    WEBSITE_RUN_FROM_PACKAGE = "1"
+    WEBSITE_CONTENTOVERVNET = "1"
+    WEBSITE_VNET_ROUTE_ALL = "1"
   }
 
   site_config {
@@ -71,3 +89,8 @@ resource "azurerm_logic_app_standard" "this" {
   }
 }
 
+
+resource "azurerm_app_service_virtual_network_swift_connection" "this" {
+  app_service_id = azurerm_logic_app_standard.this.id
+  subnet_id      = azurerm_subnet.app.id
+}

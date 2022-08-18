@@ -1,4 +1,4 @@
-name: 'Deploy Logic App Workflows'
+name: 'Deploy Logic App Function'
 
 on:
   push:
