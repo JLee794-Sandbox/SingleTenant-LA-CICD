@@ -11,7 +11,7 @@ resource "azurerm_service_plan" "this" {
   location            = azurerm_resource_group.this.location
   resource_group_name = azurerm_resource_group.this.name
   sku_name = "WS1"
-  os_type = "Windows"
+  os_type = "Linux"
 }
 
 
@@ -69,14 +69,21 @@ resource "azurerm_logic_app_standard" "this" {
   }
   app_settings = {
     EG_TOPIC_NAME = azurerm_eventgrid_topic.this.name
-    FN_CONNECTION_NAME = "azfn-py-dyninputs"
+
+    FN_NAME = azurerm_linux_function_app.this.name
+    FN_ID = azurerm_linux_function_app.this.id
+    FN_URL = azurerm_function_app.this.default_hostname
+    FN_KEY = data.azurerm_function_app_host_keys.this.primary_key
+
     EG_CONNECTION_NAME = azapi_resource.eventgrid_connection.name
     EG_CONNECTION_RUNTIME_URL = jsondecode(azapi_resource.eventgrid_connection.output).properties.connectionRuntimeUrl
     EG_CONNECTION_ID = azapi_resource.eventgrid_connection.id
     EG_API_ID = jsondecode(azapi_resource.eventgrid_connection.output).properties.api.id
-    WEBSITE_RUN_FROM_PACKAGE = "1"
+    
     WEBSITE_CONTENTOVERVNET = "1"
     WEBSITE_VNET_ROUTE_ALL = "1"
+
+    # WEBSITE_RUN_FROM_PACKAGE = "1"
   }
 
   site_config {

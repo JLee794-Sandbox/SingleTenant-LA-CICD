@@ -34,8 +34,8 @@ resource "azapi_resource" "eventgrid_connection" {
       }
       api: {
         name: "${var.logic_app_name}-mapi",
-        displayName: "${var.logic_app_name} - Managed API",
-        id: "/subscriptions/${data.azurerm_client_config.current.subscription_id}/providers/Microsoft.Web/locations/${var.location}/managedApis/azureeventgridpublish"
+        displayName: "${var.logic_app_name} - Event Grid Managed API",
+        id: "/subscriptions/${data.azurerm_client_config.current.subscription_id}/providers/Microsoft.Web/locations/${var.location}/managedApis/azureEventGridPublish"
         type: "Microsoft.Web/locations/managedApis"
       }
     }

@@ -31,7 +31,7 @@
                             ],
                             "host": {
                                 "connection": {
-                                    "referenceName": "@appsetting('EG_CONNECTION_NAME')"
+                                    "referenceName": "azureEventGridPublish"
                                 }
                             },
                             "method": "post",

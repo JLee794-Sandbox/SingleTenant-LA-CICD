@@ -1,16 +1,29 @@
 {
-  "managedApiConnections": {
-      "azureEventGridPublish": {
-          "api": {
-              "id": "@appsetting('EG_API_ID')"
-          },
-          "authentication": {
-              "type": "ManagedServiceIdentity"
-          },
-          "connection": {
-              "id": "@appsetting('EG_CONNECTION_ID')"
-          },
-          "connectionRuntimeUrl": "@appsetting('EG_CONNECTION_RUNTIME_URL')"
-      }
-  }
+    "functionConnections": {
+        "azureFunctionOperation": {
+            "authentication": {
+                "name": "Code",
+                "type": "QueryString",
+                "value": "@appsetting('FN_KEY')"
+            },
+            "displayName": "@appsetting('FN_NAME')",
+            "function": {
+                "id": "@appsetting('FN_ID')"
+            },
+            "triggerUrl": "https://@appsetting('FN_URL')/api/httpexample"
+    },
+    "managedApiConnections": {
+        "azureEventGridPublish": {
+            "api": {
+                "id": "@appsetting('EG_API_ID')"
+            },
+            "authentication": {
+                "type": "ManagedServiceIdentity"
+            },
+            "connection": {
+                "id": "@appsetting('EG_CONNECTION_ID')"
+            },
+            "connectionRuntimeUrl": "@appsetting('EG_CONNECTION_RUNTIME_URL')"
+        }
+    }
 }
