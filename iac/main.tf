@@ -72,7 +72,7 @@ resource "azurerm_logic_app_standard" "this" {
 
     FN_NAME = azurerm_linux_function_app.this.name
     FN_ID = azurerm_linux_function_app.this.id
-    FN_URL = azurerm_function_app.this.default_hostname
+    FN_URL = azurerm_linux_function_app.this.default_hostname
     FN_KEY = data.azurerm_function_app_host_keys.this.primary_key
 
     EG_CONNECTION_NAME = azapi_resource.eventgrid_connection.name
