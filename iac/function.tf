@@ -1,6 +1,6 @@
 locals {
-  function_zip_dest = "./function.zip"
-  function_src_dir = "../../function"
+  function_zip_dest = "${path.module}/function.zip"
+  function_src_dir = "${path.module}/../function"
 }
 
 data "archive_file" "file_function_app" {
