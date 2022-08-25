@@ -1,10 +1,11 @@
 locals {
   function_zip_dest = "./function.zip"
+  function_src_dir = "../../function"
 }
 
 data "archive_file" "file_function_app" {
   type        = "zip"
-  source_dir  = "../../function"
+  source_dir  = local.function_src_dir
   output_path = local.function_zip_dest
 }
 
@@ -20,7 +21,7 @@ resource "azurerm_storage_blob" "fnapp" {
   storage_account_name = azurerm_storage_account.this.name
   storage_container_name = azurerm_storage_container.fnapp.name
   type = "Block"
-  source = var.archive_file.output_path
+  source = local.function_zip_dest
 }
 
 data "azurerm_storage_account_blob_container_sas" "this" {
