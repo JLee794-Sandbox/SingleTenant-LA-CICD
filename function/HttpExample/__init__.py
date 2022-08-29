@@ -5,7 +5,10 @@ import azure.functions as func
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
-    return func.HttpResponse(f"Content from Body:\n{json.dumps(req.get_json(), indent=2, sort_keys=True)}")
+
+    body = json.loads(req.get_body().decode())
+
+    return func.HttpResponse(f"Content from Body:{body['subject']} \n\n{json.dumps(req.get_json(), indent=2, sort_keys=True)}")
 
     # name = req.params.get('name')
     # if not name:

@@ -11,6 +11,7 @@
                 "id": "@appsetting('FN_ID')"
             },
             "triggerUrl": "https://@appsetting('FN_URL')/api/httpexample"
+        }
     },
     "managedApiConnections": {
         "azureEventGridPublish": {

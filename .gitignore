@@ -12,3 +12,4 @@ cazuritedebug.log
 *.tfstate.*
 *.tfstate
 terraform.tfvars
+.venv

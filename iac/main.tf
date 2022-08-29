@@ -11,7 +11,7 @@ resource "azurerm_service_plan" "this" {
   location            = azurerm_resource_group.this.location
   resource_group_name = azurerm_resource_group.this.name
   sku_name = "WS1"
-  os_type = "Linux"
+  os_type = "Windows"
 }
 
 
@@ -31,7 +31,7 @@ resource "azurerm_storage_account" "this" {
   access_tier = "Hot"
 
   network_rules {
-    default_action             = "Deny"
+    default_action             = "Allow"
     ip_rules = [chomp(data.http.myip.body)]
     virtual_network_subnet_ids = [azurerm_subnet.storage.id]
   }
@@ -73,7 +73,7 @@ resource "azurerm_logic_app_standard" "this" {
     FN_NAME = azurerm_linux_function_app.this.name
     FN_ID = azurerm_linux_function_app.this.id
     FN_URL = azurerm_linux_function_app.this.default_hostname
-    FN_KEY = data.azurerm_function_app_host_keys.this.primary_key
+    # FN_KEY = data.azurerm_function_app_host_keys.this.primary_key
 
     EG_CONNECTION_NAME = azapi_resource.eventgrid_connection.name
     EG_CONNECTION_RUNTIME_URL = jsondecode(azapi_resource.eventgrid_connection.output).properties.connectionRuntimeUrl
